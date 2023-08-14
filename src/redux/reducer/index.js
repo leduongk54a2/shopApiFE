@@ -1,6 +1,6 @@
-import example from "./example"
-import app from "./app"
+import app from "./app";
+import employee from "./employee";
 
-const reducers = { example, app }
+const reducers = { app, employee };
 
-export default reducers
+export default reducers;

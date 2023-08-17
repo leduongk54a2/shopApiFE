@@ -70,7 +70,7 @@ function Layouts(props) {
   };
 
   return (
-    <Layout className="h-screen w-screen">
+    <Layout className="h-screen w-screen overflow-hidden">
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <div className="flex flex-col h-screen justify-between">
           <Menu

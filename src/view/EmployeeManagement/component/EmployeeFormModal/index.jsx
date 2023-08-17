@@ -7,11 +7,15 @@ import "./index.less";
 import { useDispatch } from "react-redux";
 import {
   addEmployee,
+  editEmployeeInfo,
   getAllEmployee,
 } from "../../../../redux/actions/employee";
+import moment from "moment-timezone";
+import dayjs from "dayjs";
 
-function AddEmployeeModal(props) {
+function EmployeeFormModal(props) {
   const history = useNavigate();
+  const dispatch = useDispatch();
   const [username, setUsername] = useState("");
   const [fullName, setFullname] = useState("");
   const [address, setAddress] = useState("");
@@ -23,12 +27,32 @@ function AddEmployeeModal(props) {
   const [salary, setSalary] = useState(null);
   const [gender, setGender] = useState(true);
   const [errors, setErrors] = useState([]);
-
-  const dispatch = useDispatch();
+  useEffect(() => {
+    const data = { ...props.data, ...props.data.user };
+    if (props.isEdit) {
+      setUsername((prevState) => data.username);
+      setFullname(data.full_name);
+      setAddress(data.address);
+      setPhoneNumber(data.phone_number);
+      setEmail(data.email);
+      setBirth(data.birth);
+      setSalary(data.salary);
+      setGender(Boolean(data.gender));
+    } else {
+      setUsername("");
+      setFullname("");
+      setAddress("");
+      setPhoneNumber("");
+      setEmail("");
+      setBirth("");
+      setSalary(null);
+      setGender(true);
+    }
+  }, [props.data, props.isEdit]);
 
   useEffect(() => setErrors([]), [props.visible]);
 
-  const handleSubmit = () => {
+  const handleAddEmployee = () => {
     const params = {
       username,
       full_name: fullName,
@@ -53,14 +77,40 @@ function AddEmployeeModal(props) {
     });
   };
 
+  const handleEditEmployee = () => {
+    const newData = {
+      full_name: fullName,
+      address: address,
+      birth: moment(birth).format("YYYY-MM-DD"),
+      salary: salary,
+      gender: gender,
+      phone_number: phoneNumber,
+      email: email,
+    };
+
+    dispatch(editEmployeeInfo(newData, props.data.employee_id)).then(
+      (response) => {
+        if (response.statusCode === HTTP_STATUS.CODE.SUCCESS) {
+          props.onCancel();
+          dispatch(getAllEmployee());
+        } else {
+          setErrors(
+            [...Object.values(response.data.errors), response.message] || []
+          );
+        }
+      }
+    );
+  };
+
   return (
     <Modal
-      title="Thêm thông tin nhân viên"
+      title={`${props.isEdit ? "Sửa" : "Thêm"} thông tin nhân viên`}
       centered
       open={props.visible}
-      onOk={handleSubmit}
+      onOk={props.isEdit ? handleEditEmployee : handleAddEmployee}
       onCancel={props.onCancel}
       className="add-employee-modal"
+      destroyOnClose
     >
       <Spin spinning={props.loading}>
         <Form
@@ -81,9 +131,11 @@ function AddEmployeeModal(props) {
           >
             <div>Username :</div>
             <Input
+              disabled={props.isEdit}
               onFocus={() => setErrors([])}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Username"
+              value={username}
             />
           </Form.Item>
           <Form.Item
@@ -100,6 +152,7 @@ function AddEmployeeModal(props) {
               onFocus={() => setErrors([])}
               onChange={(e) => setFullname(e.target.value)}
               placeholder="fullname"
+              value={fullName}
             />
           </Form.Item>
           <Form.Item
@@ -116,6 +169,7 @@ function AddEmployeeModal(props) {
               onFocus={() => setErrors([])}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="address"
+              value={address}
             />
           </Form.Item>
           <Form.Item
@@ -128,7 +182,13 @@ function AddEmployeeModal(props) {
             ]}
           >
             <div>Birth :</div>
-            <DatePicker onChange={(__, dateString) => setBirth(dateString)} />
+            <DatePicker
+              format="YYYY-MM-DD"
+              onChange={(__, dateString) => {
+                setBirth(dateString);
+              }}
+              value={birth.length ? dayjs(birth, "YYYY-MM-DD") : null}
+            />
           </Form.Item>
           <Form.Item
             name="Salary"
@@ -144,6 +204,7 @@ function AddEmployeeModal(props) {
               onFocus={() => setErrors([])}
               onChange={(e) => setSalary(e.target.value)}
               placeholder="Salary"
+              value={salary}
             />
           </Form.Item>
           <Form.Item
@@ -156,7 +217,11 @@ function AddEmployeeModal(props) {
             ]}
           >
             <div>Gender :</div>
-            <Select defaultValue={true} onChange={(value) => setGender(value)}>
+            <Select
+              defaultValue={true}
+              value={gender}
+              onChange={(value) => setGender(value)}
+            >
               <Select.Option value={true}>Nam</Select.Option>
               <Select.Option value={false}>Nữ</Select.Option>
             </Select>
@@ -175,6 +240,7 @@ function AddEmployeeModal(props) {
               onFocus={() => setErrors([])}
               onChange={(e) => setPhoneNumber(e.target.value)}
               placeholder="phoneNumber"
+              value={phoneNumber}
             />
           </Form.Item>
           <Form.Item
@@ -191,42 +257,49 @@ function AddEmployeeModal(props) {
               onFocus={() => setErrors([])}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="email"
+              value={email}
             />
           </Form.Item>
-          <Form.Item
-            name="newPassword"
-            rules={[
-              {
-                required: true,
-                message: "Please input your new email!",
-              },
-            ]}
-          >
-            <div>password :</div>
-            <Input
-              onFocus={() => setErrors([])}
-              onChange={(e) => setPassword(e.target.value)}
-              type="password"
-              placeholder="password"
-            />
-          </Form.Item>
-          <Form.Item
-            name="confirm password"
-            rules={[
-              {
-                required: true,
-                message: "Please input your confirm password!",
-              },
-            ]}
-          >
-            <div>confirm password :</div>
-            <Input
-              onFocus={() => setErrors([])}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              type="password"
-              placeholder="confirm password"
-            />
-          </Form.Item>
+          {!props.isEdit && (
+            <>
+              <Form.Item
+                name="newPassword"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your new email!",
+                  },
+                ]}
+              >
+                <div>password :</div>
+                <Input
+                  onFocus={() => setErrors([])}
+                  onChange={(e) => setPassword(e.target.value)}
+                  type="password"
+                  placeholder="password"
+                  value={password}
+                />
+              </Form.Item>
+              <Form.Item
+                name="confirm password"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input your confirm password!",
+                  },
+                ]}
+              >
+                <div>confirm password :</div>
+                <Input
+                  onFocus={() => setErrors([])}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  type="password"
+                  placeholder="confirm password"
+                />
+              </Form.Item>
+            </>
+          )}
+
           {errors?.map((item) => (
             <div className="text-red-700">{item}</div>
           ))}
@@ -236,4 +309,4 @@ function AddEmployeeModal(props) {
   );
 }
 
-export default AddEmployeeModal;
+export default EmployeeFormModal;

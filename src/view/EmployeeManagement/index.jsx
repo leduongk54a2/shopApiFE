@@ -1,14 +1,20 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllEmployee, getEmployeeInfo } from "../../redux/actions/employee";
+import {
+  deleteEmployee,
+  getAllEmployee,
+  getEmployeeInfo,
+  searchEmployee,
+} from "../../redux/actions/employee";
 import { HTTP_STATUS } from "../../common/constans/app";
-import { Button, Checkbox, Spin, Table } from "antd";
+import { Button, Checkbox, Input, Modal, Spin, Table } from "antd";
 import { useNavigate } from "react-router-dom";
 import ROUTES from "../../routes/routes";
 import AddEmployeeModal from "./component/EmployeeFormModal";
 import moment from "moment/moment";
 import EmployeeFormModal from "./component/EmployeeFormModal";
 import "./index.less";
+import { ExclamationCircleFilled } from "@ant-design/icons";
 
 function EmployeeManagement() {
   const dispatch = useDispatch();
@@ -18,7 +24,10 @@ function EmployeeManagement() {
   const [listEmployee, setListEmployee] = useState([]);
   const [employeeData, setEmployeeData] = useState({});
   const [selectedKeys, setSelectedKeys] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [idsToDelete, setIdsToDelete] = useState([]);
   const [visibleModal, setVisibleModal] = useState(false);
+  const [visibleDeleteModal, setVisibleDeleteModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
 
   const columns = useMemo(() => {
@@ -37,28 +46,28 @@ function EmployeeManagement() {
         render: (record) => <a>{record.username}</a>,
       },
       {
-        title: "Full Name",
+        title: "Họ tên",
         render: (record) => <a>{record.full_name}</a>,
       },
       {
-        title: "Gender",
+        title: "Giới tính",
         render: (record) => <a>{record.gender ? "Nam" : "Nữ"}</a>,
       },
       {
-        title: "Address",
+        title: "Địa chỉ",
         dataIndex: "address",
       },
       {
-        title: "Phone Number",
+        title: "Số điện thoại",
         dataIndex: "phone_number",
       },
 
       {
-        title: "Birthday",
+        title: "Ngày sinh",
         render: (record) => <a>{moment(record.birth).format("YYYY-MM-DD")}</a>,
       },
       {
-        title: "Salary",
+        title: "Lương",
         dataIndex: "salary",
       },
       {
@@ -74,12 +83,22 @@ function EmployeeManagement() {
       },
       {
         title: "Xóa",
-        render: () => (
-          <Button className="border-none bg-red-600 !text-white">Xóa</Button>
+        render: (record) => (
+          <Button
+            onClick={() => openConfirmDelete([record.employee_id])}
+            className="border-none bg-red-600 !text-white"
+          >
+            Xóa
+          </Button>
         ),
       },
     ];
   }, [dispatch]);
+
+  const openConfirmDelete = (ids) => {
+    setVisibleDeleteModal(true);
+    setIdsToDelete(ids);
+  };
 
   useEffect(() => {
     const fetchBusinesses = () =>
@@ -97,10 +116,21 @@ function EmployeeManagement() {
         return { ...item, ...item.user };
       })
     );
+    setSelectedKeys([]);
+  }, [listEmployeeRedux]);
+
+  useEffect(() => {
+    setIdsToDelete((previousState) => {
+      return visibleDeleteModal ? previousState : [];
+    });
+  }, [visibleDeleteModal]);
+
+  useEffect(() => {
+    setSelectedKeys([]);
   }, [listEmployeeRedux]);
 
   const rowSelection = {
-    selectedKeys,
+    selectedRowKeys: [...selectedKeys],
     onChange: (newSelectedKeys) => setSelectedKeys(newSelectedKeys),
   };
 
@@ -110,6 +140,20 @@ function EmployeeManagement() {
       className="!h-full !w-full !max-h-full"
       spinning={loading && !visibleModal}
     >
+      <div className="flex mx-5 my-5">
+        <Input
+          className="mr-5"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          onPressEnter={() => dispatch(searchEmployee(searchText))}
+        ></Input>
+        <Button
+          className="px-5 rounded  text-white bg-blue-600 w-fit cursor-pointer"
+          onClick={() => dispatch(searchEmployee(searchText))}
+        >
+          Tìm
+        </Button>
+      </div>
       <div
         className="px-5 py-2 ml-5 mt-5 rounded  text-white bg-blue-600 w-fit cursor-pointer"
         onClick={() => setVisibleModal(true)}
@@ -145,11 +189,30 @@ function EmployeeManagement() {
       {selectedKeys.length && (
         <div className="sticky w-5/6 h-12 m-auto mt-auto bottom-5 rounded-lg bg-blue-300 flex  items-center">
           <span className="absolute left-5">{`Đang chọn: ${selectedKeys.length}`}</span>
-          <Button className="absolute left-1/2 border-none bg-red-600  !text-white">
+          <Button
+            className="absolute left-1/2 border-none bg-red-600  !text-white"
+            onClick={() => openConfirmDelete(selectedKeys)}
+          >
             Xóa
           </Button>
         </div>
       )}
+      <Modal
+        icon={<ExclamationCircleFilled />}
+        title="Bạn có muốn xóa nhân viên không ?"
+        content="Some descriptions"
+        okText="Yes"
+        okType="danger"
+        cancelText="No"
+        onCancel={() => setVisibleDeleteModal(false)}
+        onOk={() => {
+          dispatch(deleteEmployee(idsToDelete));
+          setVisibleDeleteModal(false);
+          dispatch(getAllEmployee());
+        }}
+        open={visibleDeleteModal}
+        centered
+      ></Modal>
     </Spin>
   );
 }

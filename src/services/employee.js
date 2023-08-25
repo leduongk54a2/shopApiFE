@@ -4,6 +4,8 @@ const getAllEmployeeUrl = "/employee/all";
 const addEmployeeUrl = "/employee/add";
 const getEmployeeInfoUrl = "/employee/{id}";
 const editEmployeeInfoUrl = "/employee/edit/{id}";
+const deleteEmployeeUrl = "/employee/delete";
+const searchEmployeeUrl = "/employee/search";
 
 /**
  * getAllEmployee
@@ -35,4 +37,22 @@ export const getEmployeeInfoApi = (id) => {
  */
 export const editEmployeeInfoApi = (params, id) => {
   return httpServices.put(editEmployeeInfoUrl.replace("{id}", `${id}`), params);
+};
+
+/**
+ * deleteEmployeeApi
+ * @returns
+ */
+export const deleteEmployeeApi = (ids) => {
+  return httpServices.delete(deleteEmployeeUrl, {
+    params: { ids: ids.join() },
+  });
+};
+
+/**
+ * searchEmployeeApi
+ * @returns
+ */
+export const searchEmployeeApi = (keyword) => {
+  return httpServices.get(searchEmployeeUrl, { keyword });
 };

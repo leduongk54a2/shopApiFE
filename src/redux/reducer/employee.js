@@ -16,10 +16,13 @@ function employee(state = initState, action = {}) {
     case ACTION_TYPES.GET_ALL_EMPLOYEE_REQUEST:
     case ACTION_TYPES.ADD_EMPLOYEE_REQUEST:
     case ACTION_TYPES.GET_EMPLOYEE_INFO_REQUEST:
-    case ACTION_TYPES.EDIT_EMPLOYEE_INFO_REQUEST: {
+    case ACTION_TYPES.EDIT_EMPLOYEE_INFO_REQUEST:
+    case ACTION_TYPES.DELETE_EMPLOYEE_REQUEST:
+    case ACTION_TYPES.SEARCH_EMPLOYEE_REQUEST: {
       return { ...state, loading: true };
     }
-    case ACTION_TYPES.GET_ALL_EMPLOYEE_SUCCESS: {
+    case ACTION_TYPES.GET_ALL_EMPLOYEE_SUCCESS:
+    case ACTION_TYPES.SEARCH_EMPLOYEE_SUCCESS: {
       return { ...state, loading: false, listEmployee: action.data };
     }
     case ACTION_TYPES.GET_ALL_EMPLOYEE_FAIL:
@@ -28,7 +31,10 @@ function employee(state = initState, action = {}) {
     case ACTION_TYPES.GET_EMPLOYEE_INFO_SUCCESS:
     case ACTION_TYPES.GET_EMPLOYEE_INFO_FAIL:
     case ACTION_TYPES.EDIT_EMPLOYEE_INFO_SUCCESS:
-    case ACTION_TYPES.EDIT_EMPLOYEE_INFO_FAIL: {
+    case ACTION_TYPES.EDIT_EMPLOYEE_INFO_FAIL:
+    case ACTION_TYPES.DELETE_EMPLOYEE_SUCCESS:
+    case ACTION_TYPES.DELETE_EMPLOYEE_FAIL:
+    case ACTION_TYPES.SEARCH_EMPLOYEE_FAIL: {
       return { ...state, loading: false };
     }
 

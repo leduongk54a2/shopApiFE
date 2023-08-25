@@ -47,8 +47,10 @@ function EmployeeFormModal(props) {
       setBirth("");
       setSalary(null);
       setGender(true);
+      setPassword("");
+      setConfirmPassword("");
     }
-  }, [props.data, props.isEdit]);
+  }, [props.data, props.isEdit, props.visible]);
 
   useEffect(() => setErrors([]), [props.visible]);
 
@@ -71,7 +73,10 @@ function EmployeeFormModal(props) {
         dispatch(getAllEmployee());
       } else {
         setErrors(
-          [...Object.values(response.data.errors), response.message] || []
+          Object.values(response.errors).reduce((errorList, item) => {
+            errorList = [...errorList, ...item];
+            return errorList;
+          }, []) || []
         );
       }
     });

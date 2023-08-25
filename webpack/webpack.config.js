@@ -18,6 +18,7 @@ module.exports = {
         loader: "babel-loader",
         options: {
           presets: ["@babel/preset-env", "@babel/preset-react"],
+          sourceMap: true,
         },
       },
       {
@@ -52,6 +53,7 @@ module.exports = {
     ],
     modules: ["src", "node_modules"], // Assuming that your files are inside the src dir
   },
+  devtool: "eval-cheap-module-source-map",
   plugins: [
     new HtmlWebpackPlugin({ template: "./src/index.html" }),
     new Dotenv(),

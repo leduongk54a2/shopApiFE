@@ -1,6 +1,4 @@
 import React, { useEffect } from "react";
-import Layouts from "../../view/Layouts";
-import { Spin } from "antd";
 import { connect } from "react-redux";
 
 // This function is the actual HOC

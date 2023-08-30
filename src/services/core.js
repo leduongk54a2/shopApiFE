@@ -48,7 +48,16 @@ const httpServices = {
         return err?.response?.data;
       });
   },
-
+  patch: (url, params = {}) => {
+    return axiosWithAuth()
+      .patch(url, params)
+      .then((res) => {
+        return res.data;
+      })
+      .catch((err) => {
+        return err?.response?.data;
+      });
+  },
   delete: (url, params = {}) => {
     return axiosWithAuth()
       .delete(url, {

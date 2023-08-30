@@ -1,6 +1,6 @@
 import React from "react";
 import ROUTES from "./routes";
-import { HomeOutlined, UserOutlined } from "@ant-design/icons";
+import { HomeOutlined, InboxOutlined, UserOutlined } from "@ant-design/icons";
 
 const Routers = [
   {
@@ -35,6 +35,21 @@ const Routers = [
     label: "QLNV",
     isMenuItem: true,
     icon: <UserOutlined />,
+  },
+
+  {
+    path: ROUTES.CATEGORY_MANAGEMENT,
+    component: React.lazy(() => import("../view/CategoryManagement")),
+    label: "QL Category",
+    isMenuItem: true,
+    icon: <InboxOutlined />,
+  },
+  {
+    path: ROUTES.PRODUCT_MANAGEMENT,
+    component: React.lazy(() => import("../view/ProductManagement")),
+    label: "QL Sản Phẩm",
+    isMenuItem: true,
+    icon: <InboxOutlined />,
   },
 ];
 

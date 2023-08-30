@@ -1,40 +1,64 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  deleteEmployee,
-  getAllEmployee,
-  getEmployeeInfo,
-  searchEmployee,
-} from "../../redux/actions/employee";
+  deleteCategory,
+  getAllCategory,
+  getInfoCategory,
+  searchCategory,
+  setVisibleCategory,
+} from "../../redux/actions/category";
 import { HTTP_STATUS } from "../../common/constans/app";
 import { Button, Checkbox, Input, Modal, Spin, Table } from "antd";
 import { useNavigate } from "react-router-dom";
 import ROUTES from "../../routes/routes";
-import AddEmployeeModal from "./component/EmployeeFormModal";
 import moment from "moment/moment";
-import EmployeeFormModal from "./component/EmployeeFormModal";
 import "./index.less";
 import { ExclamationCircleFilled } from "@ant-design/icons";
+import CategoryFormModal from "./CategoryFormModal";
 
-function EmployeeManagement() {
+const Check = (props) => {
+  const dispatch = useDispatch();
+  const setVisible = (id, visible) => {
+    dispatch(setVisibleCategory(id, visible));
+    dispatch(getAllCategory());
+  };
+  const [checked, setChecked] = useState(false);
+  useEffect(() => {
+    setChecked(props.visible);
+  }, [props.visible]);
+
+  // Render the original component with the props passed down
+  return (
+    <Checkbox
+      className="scale-125"
+      type="checkbox"
+      onChange={() => {
+        setVisible(props.categoryId, checked);
+        setChecked(!checked);
+      }}
+      checked={checked}
+    ></Checkbox>
+  );
+};
+function CategoryManagement() {
   const dispatch = useDispatch();
   const history = useNavigate();
-  const loading = useSelector((state) => state.employee.loading);
-  const listEmployeeRedux = useSelector((state) => state.employee.listEmployee);
-  const [listEmployee, setListEmployee] = useState([]);
-  const [employeeData, setEmployeeData] = useState({});
+  const loading = useSelector((state) => state.category.loading);
+  const listCategoryRedux = useSelector((state) => state.category.listCategory);
+  const [listCategory, setListCategory] = useState([]);
+  const [categoryData, setCategoryData] = useState({});
   const [selectedKeys, setSelectedKeys] = useState([]);
-  const [searchText, setSearchText] = useState("");
   const [idsToDelete, setIdsToDelete] = useState([]);
+
   const [visibleModal, setVisibleModal] = useState(false);
   const [visibleDeleteModal, setVisibleDeleteModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
 
   const columns = useMemo(() => {
     const openEditForm = (id) => {
-      dispatch(getEmployeeInfo(id)).then((res) => {
+      dispatch(getInfoCategory(id)).then((res) => {
         if (res.statusCode === HTTP_STATUS.CODE.SUCCESS) {
-          setEmployeeData(res.data);
+          setCategoryData(res.data);
           setVisibleModal(true);
           setIsEdit(true);
         }
@@ -42,52 +66,51 @@ function EmployeeManagement() {
     };
     return [
       {
-        title: "Username",
-        render: (record) => <a>{record.username}</a>,
+        width: "3%",
+        title: "ID",
+        render: (record) => record.categoryId,
       },
       {
-        title: "Họ tên",
-        render: (record) => <a>{record.full_name}</a>,
+        width: "10%",
+        title: "Tên Category",
+        render: (record) => record.categoryName,
       },
       {
-        title: "Giới tính",
-        render: (record) => <a>{record.gender ? "Nam" : "Nữ"}</a>,
+        width: "50%",
+        title: "Mô tả",
+        render: (record) => record.textDescription,
       },
       {
-        title: "Địa chỉ",
-        dataIndex: "address",
+        width: "10%",
+        title: "Ẩn",
+        render: (record) => (
+          <Check
+            categoryId={record.categoryId}
+            visible={!record.visible}
+          ></Check>
+        ),
+        shouldCellUpdate: () => {
+          return true;
+        },
       },
       {
-        title: "Số điện thoại",
-        dataIndex: "phone_number",
-      },
-
-      {
-        title: "Ngày sinh",
-        render: (record) => <a>{moment(record.birth).format("YYYY-MM-DD")}</a>,
-      },
-      {
-        title: "Lương",
-        dataIndex: "salary",
-        defaultSortOrder: "descend",
-        sorter: (a, b) => +a.salary - +b.salary,
-      },
-      {
+        width: "10%",
         title: "Sửa",
         render: (record) => (
           <Button
             className="border-none bg-blue-600 !text-white"
-            onClick={() => openEditForm(record.employee_id)}
+            onClick={() => openEditForm(record.categoryId)}
           >
             Sửa
           </Button>
         ),
       },
       {
+        width: "10%",
         title: "Xóa",
         render: (record) => (
           <Button
-            onClick={() => openConfirmDelete([record.employee_id])}
+            onClick={() => openConfirmDelete([record.categoryId])}
             className="border-none bg-red-600 !text-white"
           >
             Xóa
@@ -103,23 +126,19 @@ function EmployeeManagement() {
   };
 
   useEffect(() => {
-    const fetchBusinesses = () =>
-      dispatch(getAllEmployee()).then((res) => {
+    const fetchCategory = () =>
+      dispatch(getAllCategory()).then((res) => {
         if (res.statusCode === HTTP_STATUS.CODE.UNAUTHENTICATED) {
           history(ROUTES.PAGE403);
         }
       });
-    fetchBusinesses();
+    fetchCategory();
   }, [dispatch, history]);
 
   useEffect(() => {
-    setListEmployee(
-      listEmployeeRedux?.map((item) => {
-        return { ...item, ...item.user };
-      })
-    );
+    setListCategory(listCategoryRedux);
     setSelectedKeys([]);
-  }, [listEmployeeRedux]);
+  }, [listCategoryRedux]);
 
   useEffect(() => {
     setIdsToDelete((previousState) => {
@@ -127,35 +146,18 @@ function EmployeeManagement() {
     });
   }, [visibleDeleteModal]);
 
-  useEffect(() => {
-    setSelectedKeys([]);
-  }, [listEmployeeRedux]);
-
   const rowSelection = {
     selectedRowKeys: [...selectedKeys],
     onChange: (newSelectedKeys) => setSelectedKeys(newSelectedKeys),
   };
 
+  console.log("before", listCategory);
   return (
     <Spin
       wrapperClassName="h-full w-full  absolute"
       className="!h-full !w-full !max-h-full"
       spinning={loading && !visibleModal}
     >
-      <div className="flex mx-5 my-5">
-        <Input
-          className="mr-5"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          onPressEnter={() => dispatch(searchEmployee(searchText))}
-        ></Input>
-        <Button
-          className="px-5 rounded  text-white bg-blue-600 w-fit cursor-pointer"
-          onClick={() => dispatch(searchEmployee(searchText))}
-        >
-          Tìm
-        </Button>
-      </div>
       <div
         className="px-5 py-2 ml-5 mt-5 rounded  text-white bg-blue-600 w-fit cursor-pointer"
         onClick={() => setVisibleModal(true)}
@@ -163,9 +165,9 @@ function EmployeeManagement() {
         Add
       </div>
 
-      <EmployeeFormModal
+      <CategoryFormModal
         isEdit={isEdit}
-        data={employeeData}
+        data={categoryData}
         loading={loading && visibleModal}
         visible={visibleModal}
         onCancel={() => {
@@ -174,19 +176,14 @@ function EmployeeManagement() {
         }}
       />
 
-      <Checkbox.Group
-        rootClassName="w-full p-5 min-h-full"
-        onChange={(listKey) => setSelectedKeys(listKey)}
-      >
-        <Table
-          rowSelection={rowSelection}
-          rootClassName="w-full"
-          columns={columns}
-          dataSource={listEmployee?.map((item) => {
-            return { key: item.employee_id, ...item };
-          })}
-        />
-      </Checkbox.Group>
+      <Table
+        rowSelection={rowSelection}
+        rootClassName="w-full h-full"
+        columns={columns}
+        dataSource={listCategoryRedux?.map((item) => {
+          return { key: item.categoryId, ...item };
+        })}
+      />
 
       {selectedKeys.length && (
         <div className="sticky w-5/6 h-12 m-auto mt-auto bottom-5 rounded-lg bg-blue-300 flex  items-center">
@@ -201,16 +198,16 @@ function EmployeeManagement() {
       )}
       <Modal
         icon={<ExclamationCircleFilled />}
-        title="Bạn có muốn xóa nhân viên không ?"
+        title="Bạn có muốn xóa category không ?"
         content="Some descriptions"
         okText="Yes"
         okType="danger"
         cancelText="No"
         onCancel={() => setVisibleDeleteModal(false)}
         onOk={() => {
-          dispatch(deleteEmployee(idsToDelete));
+          dispatch(deleteCategory(idsToDelete));
           setVisibleDeleteModal(false);
-          dispatch(getAllEmployee());
+          dispatch(getAllCategory());
         }}
         open={visibleDeleteModal}
         centered
@@ -219,4 +216,4 @@ function EmployeeManagement() {
   );
 }
 
-export default EmployeeManagement;
+export default CategoryManagement;

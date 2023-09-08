@@ -5,8 +5,13 @@ const axiosWithAuth = () => {
   const accessToken = localStorage.getItem("accessToken") || "";
   const instance = axios.create({
     baseURL: `${getApiBaseUrl()}/api/`,
+    contentType: "application/json",
+    accept: "application/json",
     headers: {
-      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "*",
+      "Access-Control-Expose-Headers": "*",
+      "Cache-Control": "no-cache,no-store",
       Authorization: `Bearer ${accessToken}`,
     },
   });

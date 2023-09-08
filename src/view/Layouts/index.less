@@ -8,3 +8,32 @@
 .ant-btn-text {
   color: white !important;
 }
+.ant-drawer-header {
+  padding: 0 !important;
+  .ant-drawer-header-title {
+    justify-content: flex-end;
+    .ant-drawer-close {
+      color: #fff;
+      margin-right: 5px;
+      margin-top: 5px;
+    }
+  }
+}
+
+.drawer-wrapper {
+  .ant-drawer-wrapper-body {
+    background: #001529;
+    .ant-drawer-body {
+      padding: 0;
+    }
+  }
+  .ant-drawer-content-wrapper {
+    padding-right: 50%;
+  }
+
+  @media (min-width: 640px) {
+    .ant-drawer-content-wrapper {
+      display: none;
+    }
+  }
+}

@@ -13,7 +13,6 @@ import ResetPassword from "./view/Auth/ResetPassword";
 import Layouts from "./view/Layouts";
 
 const App = () => {
-  console.log(store.getState().app.loading);
   /**
    * render
    * @returns {HTML}

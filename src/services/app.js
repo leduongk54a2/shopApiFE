@@ -4,6 +4,7 @@ const loginUrl = "user/login";
 const logoutUrl = "user/logout";
 const resetPasswordUrl = "user/update-password";
 const registerUrl = "user/create";
+const uploadImageUrl = "upload-image";
 
 /**
  * loginApi
@@ -38,4 +39,13 @@ export const resetPasswordApi = (params) => {
  */
 export const registerApi = (params) => {
   return httpServices.post(registerUrl, params);
+};
+
+/**
+ * uploadImageApi
+ * @param {Object} params
+ * @returns
+ */
+export const uploadImageApi = (params) => {
+  return httpServices.post(uploadImageUrl, params);
 };

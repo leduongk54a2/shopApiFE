@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { Avatar, Button, Layout, Menu, Spin } from "antd";
+import { Avatar, Button, Drawer, Layout, Menu, Spin } from "antd";
 import Sider from "antd/es/layout/Sider";
 import {
   LogoutOutlined,
@@ -36,7 +36,16 @@ const withAuthComponent = (WrappedComponent) => {
   return React.memo(AuthCheck);
 };
 
-const RenderRouter = () => {
+// const RenderRouter = () => {
+
+//   return <>{listRouterTag}</>;
+// };
+function Layouts(props) {
+  const [collapsed, setCollapsed] = useState(false);
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  const history = useNavigate();
+  const location = useLocation();
+
   const listRouterTag = useMemo(() => {
     return Routers.map((router, idx) => {
       return (
@@ -54,14 +63,6 @@ const RenderRouter = () => {
     });
   }, []);
 
-  return <>{listRouterTag}</>;
-};
-function Layouts(props) {
-  const [collapsed, setCollapsed] = useState(false);
-  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-  const history = useNavigate();
-  const location = useLocation();
-
   const logout = () => {
     props.logout();
     localStorage.removeItem("accessToken");
@@ -71,7 +72,12 @@ function Layouts(props) {
 
   return (
     <Layout className="h-screen w-screen overflow-hidden">
-      <Sider trigger={null} collapsible collapsed={collapsed}>
+      <Sider
+        className=" hidden lg:block"
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+      >
         <div className="flex flex-col h-screen justify-between">
           <Menu
             theme="dark"
@@ -98,6 +104,43 @@ function Layouts(props) {
           </div>
         </div>
       </Sider>
+      <Drawer
+        rootClassName="drawer-wrapper"
+        placement="left"
+        onClose={() => setCollapsed(false)}
+        open={collapsed}
+        className=" block lg:hidden"
+        maskClassName="block lg:hidden"
+      >
+        <div className="flex flex-col h-screen justify-between">
+          <Menu
+            theme="dark"
+            mode="inline"
+            defaultSelectedKeys={ROUTES.HOME}
+            selectedKeys={[location.pathname]}
+          >
+            {Routers.filter((item) => item.isMenuItem).map((menuItem) => (
+              <Menu.Item
+                onClick={() => {
+                  history(menuItem.path);
+                  setCollapsed(false);
+                }}
+                key={menuItem.path}
+                icon={menuItem.icon}
+              >
+                <span>{menuItem.label}</span>
+              </Menu.Item>
+            ))}
+          </Menu>
+          <div
+            className="flex text-white py-2 items-center justify-around bottom-0 relative   mb-5 mx-2 border-transparent border-r bg-blue-700 rounded-lg cursor-pointer"
+            onClick={logout}
+          >
+            {!collapsed && <div className="text-white">Đăng xuất</div>}
+            <LogoutOutlined style={{ fontSize: "30px" }} />
+          </div>
+        </div>
+      </Drawer>
       <Layout>
         <Header className="p-0 flex items-center justify-between">
           <Button
@@ -121,7 +164,7 @@ function Layouts(props) {
         </Header>
         <Content className="h-full w-full relative">
           <Routes>
-            {RenderRouter()}
+            {listRouterTag}
             <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
           </Routes>
         </Content>

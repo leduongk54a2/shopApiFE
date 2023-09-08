@@ -28,7 +28,7 @@ const withAuthCheck = (WrappedComponent) => {
   const mapStateToProps = (state) => {
     return { loading: state.app.loading };
   };
-  return connect(mapStateToProps)(AuthCheck);
+  return connect(mapStateToProps)(React.memo(AuthCheck));
 };
 
 export default withAuthCheck;

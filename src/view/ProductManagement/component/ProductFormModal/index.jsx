@@ -5,6 +5,7 @@ import {
   DatePicker,
   Form,
   Input,
+  InputNumber,
   Modal,
   Select,
   Spin,
@@ -19,7 +20,15 @@ import moment from "moment-timezone";
 import dayjs from "dayjs";
 
 import TextArea from "antd/es/input/TextArea";
-import { PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  register,
+  uploadImage,
+  uploadImage23,
+} from "../../../../redux/actions/app";
+import { HTTP_STATUS } from "../../../../common/constans/app";
+import { getAllCategory } from "../../../../redux/actions/category";
+import { addProduct, getAllProduct } from "../../../../redux/actions/product";
 
 function ProductFormModal(props) {
   const history = useNavigate();
@@ -27,33 +36,64 @@ function ProductFormModal(props) {
 
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState();
+  const [productInfo, setProductInfo] = useState({
+    productName: "",
+    imgUrl: null,
+    categoryId: null,
+    description: "",
+    discount: 0,
+    quantity: 1,
+    price: "",
+  });
 
   useEffect(() => {
     setErrors([]);
   }, [props.visible]);
 
-  useEffect(() => {
-    const data = { ...props.data };
-    if (props.isEdit) {
-      setErrors([]);
-    } else {
-      setErrors([]);
-    }
-  }, [props.data, props.isEdit, props.visible]);
+  //   useEffect(() => {
+  //     const data = { ...props.data };
+  //     if (props.isEdit) {
+  //       setErrors([]);
+  //     } else {
+  //       setErrors([]);
+  //     }
+  //   }, [props.data, props.isEdit, props.visible]);
 
-  const handleAddCategory = () => {
-    const params = {};
-    // dispatch(addCategory(params)).then((response) => {
-    //   if (response.statusCode === HTTP_STATUS.CODE.SUCCESS) {
-    //     props.onCancel();
-    //     dispatch(getAllCategory());
-    //   } else {
-    //     setErrors(
-    //       [...Object.values(response.data.errors), response.message] || []
-    //     );
-    //   }
-    // });
+  const handleAddProduct = () => {
+    // const params = {};
+
+    dispatch(addProduct(productInfo)).then((response) => {
+      if (response.statusCode === HTTP_STATUS.CODE.SUCCESS) {
+        props.onCancel();
+        dispatch(getAllProduct());
+      } else {
+        setErrors(
+          [...Object.values(response.data.errors), response.message] || []
+        );
+      }
+    });
+  };
+
+  const beforeUpload = (file) => {
+    const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
+    if (!isJpgOrPng) {
+      message.error("You can only upload JPG/PNG file!");
+      return false;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+    dispatch(uploadImage23(formData)).then((res) => {
+      if (res.statusCode === HTTP_STATUS.CODE.SUCCESS) {
+        setProductInfo((prevState) => ({
+          ...prevState,
+          imgUrl: res.data.imageUrl,
+        }));
+      } else {
+        setErrors([res.message] || []);
+      }
+    });
+    return false;
   };
 
   const handleEditEmployee = () => {
@@ -73,41 +113,14 @@ function ProductFormModal(props) {
     // );
   };
 
-  const getBase64 = (img, callback) => {
-    const reader = new FileReader();
-    reader.addEventListener("load", () => callback(reader.result));
-    reader.readAsDataURL(img);
-  };
-
-  const beforeUpload = (file) => {
-    const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
-    if (!isJpgOrPng) {
-      message.error("You can only upload JPG/PNG file!");
-    }
-
-    return isJpgOrPng;
-  };
-  const handleChange = (info) => {
-    if (info.file.status === "uploading") {
-      setLoading(true);
-      return;
-    }
-    if (info.file.status === "done") {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj, (url) => {
-        setLoading(false);
-        setImageUrl(url);
-      });
-    }
-  };
   return (
     <Modal
       title={`${props.isEdit ? "Sửa" : "Thêm"} thông tin sản phẩm`}
       centered
       open={props.visible}
-      onOk={props.isEdit ? handleEditEmployee : handleAddCategory}
+      onOk={props.isEdit ? handleEditEmployee : handleAddProduct}
       onCancel={props.onCancel}
-      className="add-employee-modal"
+      className="add-product-modal"
       destroyOnClose
     >
       <Spin spinning={false}>
@@ -119,84 +132,175 @@ function ProductFormModal(props) {
           }}
         >
           <Form.Item
-            name="categoryName"
+            name="productName"
             rules={[
               {
                 required: true,
-                message: "Please input your category name!",
+                message: "Please input your product name!",
               },
             ]}
           >
-            <div>Category Name :</div>
+            <div>Tên sản phẩm :</div>
             <Input
               onFocus={() => setErrors([])}
-              //   onChange={(e) => setCategoryName(e.target.value)}
-              placeholder="categoryName"
-              //   value={}
+              onChange={(e) =>
+                setProductInfo((prevState) => ({
+                  ...prevState,
+                  productName: e.target.value,
+                }))
+              }
+              placeholder="productName"
+              value={productInfo.productName}
             />
           </Form.Item>
           <Form.Item
-            name="textDescription"
+            name="description"
             rules={[
               {
                 required: true,
-                message: "Please input your text description!",
+                message: "Please input your description!",
               },
             ]}
           >
-            <div>Text Description :</div>
+            <div>Mô tả :</div>
             <TextArea
               autoSize={{ minRows: 3 }}
               size="large"
               onFocus={() => setErrors([])}
-              //   onChange={(e) => setTextDescription(e.target.value)}
-              placeholder="fullname"
-              //   value={textDescription}
+              onChange={(e) =>
+                setProductInfo((prevState) => ({
+                  ...prevState,
+                  description: e.target.value,
+                }))
+              }
+              placeholder="description"
+              value={productInfo.description}
             />
           </Form.Item>
 
-          <Upload
-            name="avatar"
-            listType="picture-card"
-            className="avatar-uploader"
-            showUploadList={false}
-            action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-            beforeUpload={beforeUpload}
-            onChange={handleChange}
-          >
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt="avatar"
-                style={{
-                  width: "100%",
-                }}
-              />
+          <Form.Item name="textDescription">
+            <div>Ảnh minh họa: </div>
+
+            {!productInfo.imgUrl ? (
+              <Upload
+                name="avatar"
+                listType="picture-card"
+                className="avatar-uploader"
+                showUploadList={false}
+                beforeUpload={beforeUpload}
+              >
+                <div>
+                  <PlusOutlined />
+                  <div
+                    style={{
+                      marginTop: 8,
+                    }}
+                  >
+                    Upload
+                  </div>
+                </div>
+              </Upload>
             ) : (
-              <div>
-                <PlusOutlined />
+              <div className="relative image-wrapper cursor-pointer">
+                <img
+                  src={productInfo.imgUrl}
+                  alt="avatar"
+                  className="w-full h-full"
+                />
                 <div
-                  style={{
-                    marginTop: 8,
+                  className="absolute z-10 top-0 w-full h-full flex justify-center align-middle items-center flex-col text-white"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setProductInfo((prevState) => ({
+                      ...prevState,
+                      imgUrl: "",
+                    }));
                   }}
                 >
-                  Upload
+                  <DeleteOutlined />
+                  <div
+                    style={{
+                      marginTop: 8,
+                    }}
+                  >
+                    Xóa
+                  </div>
                 </div>
               </div>
             )}
-          </Upload>
+          </Form.Item>
 
-          {props.isEdit && (
-            <Form.Item name="visible">
-              <div className="flex">
-                <div className="mr-5">Ẩn :</div>
-                <Checkbox
-                //   onChange={(event) => setVisible(!event.target.checked)}
-                //   defaultChecked={!visible}
-                ></Checkbox>
-              </div>
-            </Form.Item>
-          )}
+          <Form.Item name="textDescription">
+            <div>Category: </div>
+
+            <Select
+              placeholder="Chọn Category"
+              onChange={(value) =>
+                setProductInfo((prevState) => ({
+                  ...prevState,
+                  categoryId: value,
+                }))
+              }
+              value={productInfo.categoryId}
+            >
+              {props.listCategory?.map((category) => (
+                <Select.Option
+                  key={category.categoryId}
+                  value={category.categoryId}
+                >
+                  {category.categoryName}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="discount">
+            <div>Giảm giá: </div>
+
+            <InputNumber
+              addonBefore="-"
+              addonAfter="%"
+              min={0}
+              max={100}
+              defaultValue={0}
+              onChange={(value) =>
+                setProductInfo((prevState) => ({
+                  ...prevState,
+                  discount: value,
+                }))
+              }
+              value={productInfo.discount}
+            />
+          </Form.Item>
+          <Form.Item name="quantity">
+            <div>Số Lượng: </div>
+
+            <InputNumber
+              min={1}
+              max={100000}
+              defaultValue={1}
+              onChange={(value) =>
+                setProductInfo((prevState) => ({
+                  ...prevState,
+                  quantity: value,
+                }))
+              }
+              value={productInfo.quantity}
+            />
+          </Form.Item>
+          <Form.Item name="price">
+            <div>Giá: </div>
+
+            <InputNumber
+              onChange={(value) =>
+                setProductInfo((prevState) => ({
+                  ...prevState,
+                  price: value,
+                }))
+              }
+            />
+          </Form.Item>
+
           {errors?.map((item) => (
             <div className="text-red-700">{item}</div>
           ))}

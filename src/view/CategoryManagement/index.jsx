@@ -126,13 +126,7 @@ function CategoryManagement() {
   };
 
   useEffect(() => {
-    const fetchCategory = () =>
-      dispatch(getAllCategory()).then((res) => {
-        if (res.statusCode === HTTP_STATUS.CODE.UNAUTHENTICATED) {
-          history(ROUTES.PAGE403);
-        }
-      });
-    fetchCategory();
+    dispatch(getAllCategory());
   }, [dispatch, history]);
 
   useEffect(() => {
@@ -151,7 +145,6 @@ function CategoryManagement() {
     onChange: (newSelectedKeys) => setSelectedKeys(newSelectedKeys),
   };
 
-  console.log("before", listCategory);
   return (
     <Spin
       wrapperClassName="h-full w-full  absolute"

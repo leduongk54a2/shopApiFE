@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import ProductFormModal from "./component/ProductFormModal";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllProduct } from "../../redux/actions/product";
-import { HTTP_STATUS } from "../../common/constans/app";
+import { ROLE } from "../../common/constans/app";
 import { useNavigate } from "react-router-dom";
-import ROUTES from "../../routes/routes";
 import { Col, Empty, Input, Row, Select, Spin } from "antd";
 import { getAllCategory } from "../../redux/actions/category";
 import { SORT_TYPE } from "../../common/constans/common";
@@ -17,6 +16,16 @@ function ProductManagement() {
   const history = useNavigate();
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.product.loading);
+  const isAccessBuy = useMemo(() => {
+    return [ROLE.CUSTOMER, ROLE.EMPLOYEE].includes(
+      JSON.parse(localStorage.getItem("userInfo")).role
+    );
+  }, []);
+  const isAccessEdit = useMemo(() => {
+    return [ROLE.ADMIN, ROLE.EMPLOYEE].includes(
+      JSON.parse(localStorage.getItem("userInfo")).role
+    );
+  }, []);
   const listProduct = useSelector((state) => state.product?.listProduct);
   const listCategory = useSelector((state) => state.category.listCategory);
   const [visible, setVisible] = useState(false);
@@ -65,7 +74,6 @@ function ProductManagement() {
                         keyword: keywordRef.current.input.value,
                       }));
                     }}
-                    onEn
                     className="px-5 py-2 ml-5 rounded  text-white bg-blue-600 w-fit cursor-pointer"
                   >
                     Tìm
@@ -125,12 +133,14 @@ function ProductManagement() {
               </Row>
             </Col>
           </div>
-          <div
-            className="px-5 py-2  mt-5 rounded  text-white bg-blue-600 w-fit cursor-pointer"
-            onClick={() => setVisible(true)}
-          >
-            Add
-          </div>
+          {isAccessEdit && (
+            <div
+              className="px-5 py-2  mt-5 rounded  text-white bg-blue-600 w-fit cursor-pointer"
+              onClick={() => setVisible(true)}
+            >
+              Add
+            </div>
+          )}
           {Boolean(!listProduct.length) && (
             <div className="w-full h-full ">
               <div className="w-full h-full ">
@@ -141,39 +151,36 @@ function ProductManagement() {
 
           {Boolean(listProduct.length) && (
             <div className="flex h-3/4 overflow-auto product-wrapper">
-              <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8 min-h-full h-fit">
+              <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8 h-fit">
                 {listProduct?.map((product) => (
                   <div
                     key={product.productId}
                     className="group relative  pb-5 border-solid border-2 rounded-lg"
                   >
-                    <div className="relative aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none  lg:h-80 ">
+                    <div
+                      onClick={() => {
+                        setDataPreview(product);
+                        setVisiblePreview(true);
+                      }}
+                      className=" hover:bg-white hover:opacity-30 cursor-pointer relative aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none  lg:h-80 "
+                    >
                       <img
                         src={product.imgUrl}
                         alt={product.productName}
                         className="h-full bg-white w-full object-contain object-center lg:h-full lg:w-full"
                       />
-                      <ShoppingCartOutlined
-                        onClick={() => {
-                          if (product.quantity) {
-                            setDataPreview(product);
-                            setVisiblePreview(true);
-                          }
-                        }}
-                        className={`${
-                          product.quantity
-                            ? "bg-blue-600 cursor-pointer"
-                            : "bg-gray-600 !cursor-not-allowed"
-                        } text-white text-7xl  shopping-icon`}
-                      />
+
+                      {isAccessBuy && (
+                        <ShoppingCartOutlined
+                          className={`${
+                            product.quantity ? "bg-blue-600" : "bg-gray-600"
+                          } text-white text-7xl  cursor-pointer shopping-icon`}
+                        />
+                      )}
                     </div>
                     <div className="mt-4 flex justify-between">
                       <div className="pl-5">
                         <h3 className="text-sm text-gray-700">
-                          <span
-                            aria-hidden="true"
-                            className="absolute inset-0"
-                          />
                           {product.productName}
                         </h3>
                         <p className="mt-1 text-sm text-gray-500">
@@ -189,12 +196,14 @@ function ProductManagement() {
                       </div>
                       <p className="pr-5 text-sm font-medium text-gray-900">
                         Giá: ₫{product.price}
-                        <div
-                          className="px-5 py-2 ml-auto rounded  text-white bg-blue-600 w-fit cursor-pointer"
-                          onClick={() => setVisible(true)}
-                        >
-                          Sửa
-                        </div>
+                        {isAccessEdit && (
+                          <div
+                            className="px-5 py-2 ml-auto rounded  text-white bg-blue-600 w-fit cursor-pointer"
+                            onClick={() => setVisible(true)}
+                          >
+                            Sửa
+                          </div>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -212,6 +221,7 @@ function ProductManagement() {
           visible={visiblePreview}
           onCancel={() => setVisiblePreview(false)}
           dataPreview={dataPreview}
+          isAccessBuy={isAccessBuy}
         />
       </div>
     </Spin>

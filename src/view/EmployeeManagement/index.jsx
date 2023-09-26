@@ -103,13 +103,7 @@ function EmployeeManagement() {
   };
 
   useEffect(() => {
-    const fetchBusinesses = () =>
-      dispatch(getAllEmployee()).then((res) => {
-        if (res.statusCode === HTTP_STATUS.CODE.UNAUTHENTICATED) {
-          history(ROUTES.PAGE403);
-        }
-      });
-    fetchBusinesses();
+    dispatch(getAllEmployee());
   }, [dispatch, history]);
 
   useEffect(() => {

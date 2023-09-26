@@ -22,7 +22,7 @@ const App = () => {
       <Provider store={store}>
         <ConfigProvider theme={{ hashed: false }}>
           <BrowserRouter>
-            <Layouts></Layouts>
+            <Layouts />
           </BrowserRouter>
         </ConfigProvider>
       </Provider>
@@ -30,4 +30,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default React.memo(App);

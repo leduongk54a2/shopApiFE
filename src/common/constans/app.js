@@ -12,4 +12,10 @@ const HTTP_STATUS = {
   },
 };
 
-export { HTTP_STATUS };
+const ROLE = {
+  ADMIN: "admin",
+  EMPLOYEE: "employee",
+  CUSTOMER: "customer",
+};
+
+export { HTTP_STATUS, ROLE };

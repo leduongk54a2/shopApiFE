@@ -8,6 +8,7 @@ const ROUTES = {
   EMPLOYEE_MANAGEMENT: "/employee-management",
   CATEGORY_MANAGEMENT: "/category-management",
   PRODUCT_MANAGEMENT: "/product-management",
+  ORDER_DETAIL: "/order-detail",
 };
 
 export default ROUTES;

@@ -1,8 +1,22 @@
-import React from "react";
-import { Button, Col, Image, Modal, Row } from "antd";
+import React, { useEffect, useState } from "react";
+import { Button, Col, Image, Input, InputNumber, Modal, Row } from "antd";
 import "./index.less";
+import { useDispatch } from "react-redux";
+import { getCartInfo, updateCart } from "../../../../redux/actions/cart";
 
 function PreviewProductModal(props) {
+  const dispatch = useDispatch();
+  const [quantity, setQuantity] = useState(0);
+  const [isCanBuy, setIsCanBuy] = useState(false);
+
+  useEffect(() => {
+    setQuantity(0);
+  }, [props.visible]);
+
+  useEffect(() => {
+    setIsCanBuy(props.dataPreview.quantity === 0);
+  }, [props.dataPreview.quantity]);
+
   return (
     <Modal
       className="wrap-preview-modal !w-5/6 h-3/4 overflow-auto lg:!w-1/2 lg:h-1/2 bg-white"
@@ -54,14 +68,57 @@ function PreviewProductModal(props) {
           </Row>
           <Row
             lg={12}
-            className="text-xl  text-blue-400 flex items-center lg:text-2xl"
+            className="text-xl text-blue-400 flex items-center lg:text-2xl"
           >
-            Còn Lại: {props.dataPreview.quantity}
+            Còn Lại:{" "}
+            <span
+              className={`${
+                props.dataPreview.quantity ? "text-blue-400" : "text-red-500"
+              }`}
+            >
+              {props.dataPreview.quantity}
+            </span>
           </Row>
           <Row className="mt-5">{props.dataPreview.description}</Row>
-          <Row className="mt-5 pb-5 flex justify-center lg:pb-0">
-            <Button className="w-20 h-16 bg-blue-600 text-white">Mua</Button>
-          </Row>
+          {props.isAccessBuy && (
+            <>
+              <Row className="mt-5 pb-5 flex justify-center items-center lg:pb-0">
+                <InputNumber
+                  className="h-10 mr-10 cursor-default"
+                  min={0}
+                  max={props.dataPreview.quantity}
+                  defaultValue={isCanBuy ? 0 : 1}
+                  onChange={(value) => setQuantity(value)}
+                  value={quantity}
+                />
+                <Button
+                  className={`w-20 h-16 bg-blue-600 text-white ${
+                    isCanBuy || quantity === 0
+                      ? "bg-gray-600 cursor-not-allowed hover:!text-white"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    if (isCanBuy && quantity) {
+                      dispatch(
+                        updateCart({
+                          listCartItem: [
+                            {
+                              productId: props.dataPreview.productId,
+                              quantity: quantity,
+                            },
+                          ],
+                        })
+                      );
+                      setTimeout(() => dispatch(getCartInfo()), 100);
+                      setTimeout(() => props.onCancel(), 200);
+                    }
+                  }}
+                >
+                  Mua
+                </Button>
+              </Row>
+            </>
+          )}
         </Col>
       </Row>
     </Modal>

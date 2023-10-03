@@ -98,7 +98,7 @@ function PreviewProductModal(props) {
                       : ""
                   }`}
                   onClick={() => {
-                    if (isCanBuy && quantity) {
+                    if (isCanBuy || quantity) {
                       dispatch(
                         updateCart({
                           listCartItem: [

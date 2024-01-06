@@ -30,8 +30,15 @@ function cart(state = initState, action = {}) {
         loading: false,
       };
     }
+    case ACTION_TYPES.CREATE_OR_UPDATE_CART_SUCCESS: {
+      return {
+        ...state,
+        listCartItem: [...action.data.listCartItem],
+        total: action.data.total,
+        loading: false,
+      };
+    }
     case ACTION_TYPES.CREATE_OR_UPDATE_CART_FAIL:
-    case ACTION_TYPES.CREATE_OR_UPDATE_CART_SUCCESS:
     case ACTION_TYPES.GET_CART_INFO_FAIL:
     case ACTION_TYPES.UPDATE_QUANTITY_CART_ITEM_SUCCESS:
     case ACTION_TYPES.UPDATE_QUANTITY_CART_ITEM_FAIL: {

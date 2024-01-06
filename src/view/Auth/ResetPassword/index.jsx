@@ -1,5 +1,5 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Form, Input, Spin } from "antd";
+import { Button, Form, Image, Input, Spin } from "antd";
 import React, { useState } from "react";
 import { resetPassword } from "../../../redux/actions/app";
 import { connect } from "react-redux";
@@ -36,6 +36,18 @@ function ResetPasswordForm(props) {
           remember: true,
         }}
       >
+        <div className="flex flex-row items-center justify-center mb-6">
+          <span className="text-4xl font-extrabold hidden sm:block">
+            Shiba Store
+          </span>
+
+          <Image
+            height={50}
+            width={50}
+            src={window.location.origin + "/Logo.png"}
+            preview={false}
+          ></Image>
+        </div>
         <Form.Item
           name="username"
           rules={[

@@ -8,7 +8,7 @@ import "./common/css/index.less";
 import "antd/dist/reset.css";
 import { ConfigProvider, Spin } from "antd";
 import Login from "./view/Auth/Login";
-import withAuthCheck from "./common/HOCs";
+import withAuthCheck from "./common/HOCs/withAuthCheck";
 import ResetPassword from "./view/Auth/ResetPassword";
 import Layouts from "./view/Layouts";
 

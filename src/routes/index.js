@@ -11,7 +11,7 @@ const Routers = [
     component: React.lazy(() => import("../view/Home")),
     label: "HOME",
     isMenuItem: true,
-    role: FULL_ACCESS,
+    role: [ROLE.ADMIN, ROLE.EMPLOYEE],
     icon: <HomeOutlined />,
   },
   {
@@ -36,6 +36,7 @@ const Routers = [
     path: ROUTES.PAGE403,
     component: React.lazy(() => import("../view/Auth/403Page")),
     role: FULL_ACCESS,
+    auth: true,
   },
   {
     path: ROUTES.EMPLOYEE_MANAGEMENT,
@@ -55,6 +56,15 @@ const Routers = [
     icon: <InboxOutlined />,
   },
   {
+    path: ROUTES.SUPPLIER_MANAGEMENT,
+    component: React.lazy(() => import("../view/SupplierManagement")),
+    label: "QL Nhà cung câp",
+    role: [ROLE.ADMIN, ROLE.EMPLOYEE],
+    isMenuItem: true,
+    icon: <InboxOutlined />,
+  },
+
+  {
     path: ROUTES.PRODUCT_MANAGEMENT,
     component: React.lazy(() => import("../view/ProductManagement")),
     label: "QL Sản Phẩm",
@@ -63,9 +73,48 @@ const Routers = [
     icon: <InboxOutlined />,
   },
   {
+    path: ROUTES.STATISTIC,
+    component: React.lazy(() => import("../view/Statistic")),
+    label: "Thống kê",
+    role: [ROLE.ADMIN, ROLE.EMPLOYEE],
+    isMenuItem: true,
+    icon: <InboxOutlined />,
+  },
+  {
     path: ROUTES.ORDER_DETAIL,
     component: React.lazy(() => import("../view/OrderDetail")),
     role: FULL_ACCESS,
+    viewUser: true,
+    auth: true,
+  },
+  {
+    path: ROUTES.HOME_USER,
+    component: React.lazy(() => import("../view/UserView")),
+    role: FULL_ACCESS,
+    viewUser: true,
+    auth: true,
+  },
+
+  {
+    path: ROUTES.PRODUCT_DETAIL,
+    component: React.lazy(() => import("../view/ProductView")),
+    role: FULL_ACCESS,
+    viewUser: true,
+    auth: true,
+  },
+  {
+    path: ROUTES.LIST_ORDER_HISTORY,
+    component: React.lazy(() => import("../view/OrderHistory")),
+    role: FULL_ACCESS,
+    viewUser: true,
+    auth: true,
+  },
+  {
+    path: ROUTES.ORDER_DETAIL_HISTORY,
+    component: React.lazy(() => import("../view/OrderDetailsHistory")),
+    role: FULL_ACCESS,
+    viewUser: true,
+    auth: true,
   },
 ];
 

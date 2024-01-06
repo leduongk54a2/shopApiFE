@@ -16,7 +16,9 @@ export const updateCart = (params) => {
     dispatch(request(ACTION_TYPES.CREATE_OR_UPDATE_CART_REQUEST));
     return updateCartApi(params).then((response) => {
       if (response?.statusCode === HTTP_STATUS.CODE.SUCCESS) {
-        dispatch(success(ACTION_TYPES.CREATE_OR_UPDATE_CART_SUCCESS));
+        dispatch(
+          success(ACTION_TYPES.CREATE_OR_UPDATE_CART_SUCCESS, response.data)
+        );
       } else {
         dispatch(fail(ACTION_TYPES.CREATE_OR_UPDATE_CART_FAIL));
       }

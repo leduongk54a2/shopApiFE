@@ -1,8 +1,12 @@
 import { ShoppingCartOutlined } from "@ant-design/icons";
 import { Button, InputNumber, Popover, Spin, Table } from "antd";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getCartInfo, updateQuantityCartItem } from "../../redux/actions/cart";
+import {
+  getCartInfo,
+  updateCart,
+  updateQuantityCartItem,
+} from "../../redux/actions/cart";
 import "./index.less";
 import { useNavigate } from "react-router-dom";
 import ROUTES from "../../routes/routes";
@@ -12,7 +16,9 @@ const Content = () => {
   const dispatch = useDispatch();
   const listCartItem = useSelector((state) => state.cart.listCartItem);
   const loading = useSelector((state) => state.cart.loading);
-
+  const userInfo = useMemo(() => {
+    return JSON.parse(localStorage.getItem("userInfo"));
+  }, []);
   const columns = [
     {
       title: "San pham",
@@ -27,10 +33,13 @@ const Content = () => {
           defaultValue={record.quantity}
           onChange={(value) => {
             dispatch(
-              updateQuantityCartItem({
-                cartId: record.cartId,
-                productId: record.productId,
-                quantity: value,
+              updateCart({
+                listCartItem: [
+                  {
+                    productId: record.productId,
+                    quantity: value,
+                  },
+                ],
               })
             );
             dispatch(getCartInfo());
@@ -73,14 +82,16 @@ const Content = () => {
   return (
     <Spin spinning={loading}>
       <Table columns={columns} dataSource={listCartItem} pagination={false} />
-      <div className="mt-5 w-full flex items-center justify-end">
-        <Button
-          className=" bg-blue-600 text-white"
-          onClick={() => history(ROUTES.ORDER_DETAIL)}
-        >
-          Dat hang
-        </Button>
-      </div>
+      {userInfo && (
+        <div className="mt-5 w-full flex items-center justify-end">
+          <Button
+            className=" bg-blue-600 text-white"
+            onClick={() => history(ROUTES.ORDER_DETAIL)}
+          >
+            Dat hang
+          </Button>
+        </div>
+      )}
     </Spin>
   );
 };
@@ -94,7 +105,7 @@ function ShoppingCart() {
   return (
     <Popover content={<Content />} title="Gio Hang">
       <div className="relative">
-        <ShoppingCartOutlined className="text-3xl text-white cursor-pointer ml-5" />
+        <ShoppingCartOutlined className="text-3xl text-black cursor-pointer ml-5" />
         <div className="absolute text-white bg-red-500 cart-icon">
           {listCartItem.length}
         </div>

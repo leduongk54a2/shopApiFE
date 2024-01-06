@@ -1,14 +1,72 @@
-import { Button, Input, InputNumber, Spin, Table } from "antd";
-import React, { useEffect } from "react";
-import { getCartInfo, updateQuantityCartItem } from "../../redux/actions/cart";
+import {
+  Button,
+  Col,
+  DatePicker,
+  Input,
+  InputNumber,
+  Modal,
+  Row,
+  Spin,
+  Table,
+} from "antd";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  getCartInfo,
+  updateCart,
+  updateQuantityCartItem,
+} from "../../redux/actions/cart";
+import moment from "moment-timezone";
+import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
+import { getCustomerInfo } from "../../redux/actions/customer";
+import { saveOrder } from "../../redux/actions/order";
+import { useNavigate } from "react-router-dom";
+import ROUTES from "../../routes/routes";
 
 function OrderDetail() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const listCartItem = useSelector((state) => state.cart.listCartItem);
   const total = useSelector((state) => state.cart.total);
-
+  const userInfo = useMemo(() => {
+    return JSON.parse(localStorage.getItem("userInfo"));
+  }, []);
   const loading = useSelector((state) => state.cart.loading);
+  const [birth, setBirth] = useState("");
+  const [creditNumber, setCreditNumber] = useState("");
+  const [comment, setComment] = useState("");
+
+  useEffect(() => {
+    dispatch(getCustomerInfo(userInfo.userID)).then((res) => {
+      setCreditNumber(res.data.credit_card_number);
+    });
+  }, []);
+
+  const buyOrder = () => {
+    const params = {
+      userId: userInfo.userID,
+      shippedDate: birth,
+      total: total,
+      customerInfo: `${userInfo.full_name}-${userInfo.email}-${userInfo.phone_number}`,
+      comment: comment,
+      address: userInfo.address,
+      cartItems: listCartItem,
+    };
+    dispatch(saveOrder(params)).then((res) => {
+      if (res) {
+        success();
+        setTimeout(() => Modal.destroyAll(), 1000);
+        setTimeout(() => navigate(ROUTES.HOME_USER), 2000);
+      }
+    });
+  };
+
+  const success = () => {
+    Modal.success({
+      content: "Mua hang thanh cong",
+      footer: null,
+    });
+  };
 
   const columns = [
     {
@@ -33,10 +91,13 @@ function OrderDetail() {
           defaultValue={record.quantity}
           onChange={(value) => {
             dispatch(
-              updateQuantityCartItem({
-                cartId: record.cartId,
-                productId: record.productId,
-                quantity: value,
+              updateCart({
+                listCartItem: [
+                  {
+                    productId: record.productId,
+                    quantity: value,
+                  },
+                ],
               })
             );
             dispatch(getCartInfo());
@@ -88,14 +149,98 @@ function OrderDetail() {
   }, [dispatch]);
   return (
     <Spin spinning={loading}>
-      <Table
-        className="p-5"
-        columns={columns}
-        dataSource={listCartItem}
-        pagination={false}
-      />
-      <div className="ml-5">
-        Thanh Tien : <Input className="w-60" disabled value={total}></Input>
+      <div className="h-screen">
+        <Table
+          className="p-5 "
+          columns={columns}
+          dataSource={listCartItem}
+          pagination={false}
+        />
+        <Row>
+          <Col
+            lg={12}
+            xs={24}
+            className="ml-5 mt-6 flex justify-between items-center"
+          >
+            Thanh Tien : <Input className="w-60" disabled value={total}></Input>
+          </Col>
+          <Col
+            lg={12}
+            xs={24}
+            className="ml-5 mt-6 flex justify-between items-center"
+          >
+            Ho va Ten:{" "}
+            <Input className="w-60" disabled value={userInfo.full_name}></Input>
+          </Col>
+          <Col
+            lg={12}
+            xs={24}
+            className="ml-5 mt-6 flex justify-between items-center"
+          >
+            email:{" "}
+            <Input className="w-60" disabled value={userInfo.email}></Input>
+          </Col>
+          <Col
+            lg={12}
+            xs={24}
+            className="ml-5 mt-6 flex justify-between items-center"
+          >
+            So dien thoai:{" "}
+            <Input
+              className="w-60"
+              disabled
+              value={userInfo.phone_number}
+            ></Input>
+          </Col>
+          <Col
+            lg={12}
+            xs={24}
+            className="ml-5 mt-6 flex justify-between items-center"
+          >
+            dia chi:{" "}
+            <Input className="w-60" disabled value={userInfo.address}></Input>
+          </Col>
+          <Col
+            lg={12}
+            xs={24}
+            className="ml-5 mt-6 flex justify-between items-center"
+          >
+            so the:{" "}
+            <Input className="w-60" disabled value={creditNumber}></Input>
+          </Col>
+          <Col
+            lg={12}
+            xs={24}
+            className="ml-5 mt-6 flex justify-between items-center"
+          >
+            ghi chu:{" "}
+            <Input
+              className="w-60"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            ></Input>
+          </Col>
+          <Col
+            lg={12}
+            xs={24}
+            className="ml-5 mt-6 flex justify-between items-center"
+          >
+            Ngay giao:{" "}
+            <DatePicker
+              className="w-60"
+              format="YYYY-MM-DD"
+              onChange={(__, dateString) => {
+                setBirth(dateString);
+              }}
+              value={birth.length ? dayjs(birth, "YYYY-MM-DD") : null}
+            />
+          </Col>
+        </Row>
+        <Row className="flex justify-center items-center">
+          <Button className="mt-10 " onClick={buyOrder}>
+            Xác nhận thanh toán
+          </Button>
+        </Row>
       </div>
     </Spin>
   );

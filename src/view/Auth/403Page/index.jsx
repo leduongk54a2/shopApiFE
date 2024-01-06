@@ -24,7 +24,7 @@ function Page403() {
       </div>
 
       <div class="buttons">
-        <a class="button" onClick={() => history(ROUTES.HOME)}>
+        <a class="button" onClick={() => history(ROUTES.HOME_USER)}>
           Go to homepage
         </a>
       </div>

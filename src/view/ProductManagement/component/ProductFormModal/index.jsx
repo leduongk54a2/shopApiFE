@@ -28,7 +28,11 @@ import {
 } from "../../../../redux/actions/app";
 import { HTTP_STATUS } from "../../../../common/constans/app";
 import { getAllCategory } from "../../../../redux/actions/category";
-import { addProduct, getAllProduct } from "../../../../redux/actions/product";
+import {
+  addProduct,
+  getAllProduct,
+  updateProductInfo,
+} from "../../../../redux/actions/product";
 
 function ProductFormModal(props) {
   const history = useNavigate();
@@ -40,6 +44,7 @@ function ProductFormModal(props) {
     productName: "",
     imgUrl: null,
     categoryId: null,
+    supplierId: null,
     description: "",
     discount: 0,
     quantity: 1,
@@ -48,6 +53,39 @@ function ProductFormModal(props) {
 
   useEffect(() => {
     setErrors([]);
+    if (props.visible && props.isEdit) {
+      const {
+        productName,
+        imgUrl,
+        categoryId,
+        description,
+        discount,
+        supplierId,
+        quantity,
+        price,
+      } = props.productInfo;
+      setProductInfo({
+        productName,
+        imgUrl,
+        categoryId,
+        description,
+        discount,
+        quantity,
+        supplierId,
+        price,
+      });
+    } else {
+      setProductInfo({
+        productName: "",
+        imgUrl: null,
+        categoryId: null,
+        supplierId: null,
+        description: "",
+        discount: 0,
+        quantity: 1,
+        price: "",
+      });
+    }
   }, [props.visible]);
 
   //   useEffect(() => {
@@ -97,20 +135,18 @@ function ProductFormModal(props) {
   };
 
   const handleEditEmployee = () => {
-    const newData = {};
-
-    // dispatch(editInfoCategory(props.data.categoryId, newData)).then(
-    //   (response) => {
-    //     if (response.statusCode === HTTP_STATUS.CODE.SUCCESS) {
-    //       props.onCancel();
-    //       dispatch(getAllCategory());
-    //     } else {
-    //       setErrors(
-    //         [...Object.values(response.data.errors), response.message] || []
-    //       );
-    //     }
-    //   }
-    // );
+    dispatch(updateProductInfo(props.productInfo.productId, productInfo)).then(
+      (response) => {
+        if (response.statusCode === HTTP_STATUS.CODE.SUCCESS) {
+          props.onCancel();
+          dispatch(getAllCategory());
+        } else {
+          setErrors(
+            [...Object.values(response.data.errors), response.message] || []
+          );
+        }
+      }
+    );
   };
 
   return (
@@ -253,6 +289,29 @@ function ProductFormModal(props) {
               ))}
             </Select>
           </Form.Item>
+          <Form.Item name="textDescription">
+            <div>Nhà cung cấp: </div>
+
+            <Select
+              placeholder="Chọn nhà cung cấp"
+              onChange={(value) =>
+                setProductInfo((prevState) => ({
+                  ...prevState,
+                  supplierId: value,
+                }))
+              }
+              value={productInfo.supplierId}
+            >
+              {props.listSupplier?.map((category) => (
+                <Select.Option
+                  key={category.supplierId}
+                  value={category.supplierId}
+                >
+                  {category.supplierName}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
 
           <Form.Item name="discount">
             <div>Giảm giá: </div>
@@ -298,6 +357,7 @@ function ProductFormModal(props) {
                   price: value,
                 }))
               }
+              value={productInfo.price}
             />
           </Form.Item>
 

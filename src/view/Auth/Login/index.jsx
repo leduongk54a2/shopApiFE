@@ -1,5 +1,5 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Checkbox, Form, Input, Spin } from "antd";
+import { Button, Checkbox, Form, Image, Input, Spin } from "antd";
 import React, { useState } from "react";
 import { login } from "../../../redux/actions/app";
 import { connect } from "react-redux";
@@ -19,7 +19,7 @@ function LoginForm(props) {
         localStorage.setItem("accessToken", response.data.accessToken);
         localStorage.setItem("userInfo", JSON.stringify(response.data.user));
 
-        history(ROUTES.HOME);
+        history(ROUTES.HOME_USER);
       } else {
         setError(response.message || "");
       }
@@ -35,6 +35,18 @@ function LoginForm(props) {
           remember: true,
         }}
       >
+        <div className="flex flex-row items-center justify-center mb-6">
+          <span className="text-4xl font-extrabold hidden sm:block">
+            Shiba Store
+          </span>
+
+          <Image
+            height={50}
+            width={50}
+            src={window.location.origin + "/Logo.png"}
+            preview={false}
+          ></Image>
+        </div>
         <Form.Item
           name="username"
           rules={[
@@ -78,7 +90,7 @@ function LoginForm(props) {
             className="login-form-forgot cursor-pointer hover:text-blue-400"
             onClick={() => history(ROUTES.RESET_PASSWORD)}
           >
-            Forgot password
+            Reset password
           </div>
         </Form.Item>
 

@@ -26,9 +26,10 @@ import {
 import ROUTES from "../../routes/routes";
 import Routers from "../../routes";
 import ShoppingCart from "../ShoppingCart";
-import withAuthCheck from "../../common/HOCs";
+import withAuthCheck from "../../common/HOCs/withAuthCheck";
 import { logout } from "../../redux/actions/app";
 import { getCartInfo } from "../../redux/actions/cart";
+import withViewLayout from "../../common/HOCs/withViewLayout";
 
 const withAuthComponent = (WrappedComponent) => {
   const AuthCheck = (props) => {
@@ -53,7 +54,11 @@ const Layouts = (props) => {
   const listRouterTag = useMemo(() => {
     return Routers.map((router, idx) => {
       const ComponentRender = router.auth
-        ? withAuthComponent(router.component)
+        ? withAuthComponent(
+            router.viewUser
+              ? withViewLayout(router.component)
+              : router.component
+          )
         : withAuthCheck(router.component, router.role);
       return (
         <Route
@@ -104,7 +109,6 @@ const Layouts = (props) => {
             icon={<UserOutlined />}
           ></Avatar>{" "}
           <div className="text-white pl-5 pr-5">{userInfo?.full_name}</div>
-          <ShoppingCart />
         </div>
       </Layout.Header>
     );
@@ -182,7 +186,7 @@ const Layouts = (props) => {
                 {listRouterTag}
                 <Route
                   path="*"
-                  element={<Navigate to={ROUTES.HOME} replace />}
+                  element={<Navigate to={ROUTES.HOME_USER} replace />}
                 />
               </Routes>
             </Layout.Content>

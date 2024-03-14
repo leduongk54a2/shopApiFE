@@ -5,6 +5,7 @@ import { CategoryScale } from "chart.js";
 import { useDispatch, useSelector } from "react-redux";
 import { getStatistic } from "../../redux/actions/order";
 import { Select, Spin } from "antd";
+import "./index.less";
 Chart.register(CategoryScale);
 
 const labels = [
@@ -86,7 +87,7 @@ function Statistic() {
         )}
         {dataShow && (
           <Bar
-            className="!w-full !h-full m-auto pt-14"
+            className="m-auto pt-14"
             data={dataShow}
             options={{
               plugins: {

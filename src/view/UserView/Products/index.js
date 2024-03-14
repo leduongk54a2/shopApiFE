@@ -131,8 +131,6 @@ function Products() {
     });
   };
 
-  console.log(listProductDisplay);
-
   return (
     <Col className="productsContainer" lg={24} xs={24}>
       {paramSearchSelect.categoryId === null &&
